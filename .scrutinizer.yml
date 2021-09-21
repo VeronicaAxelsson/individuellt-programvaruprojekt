@@ -1,0 +1,18 @@
+imports:
+    - php
+
+filter:
+    excluded_paths:
+        - "manage.py"
+
+checks:
+    python:
+        code_rating: true
+        duplicate_code: true
+
+build:
+  nodes:
+    analysis:
+      tests:
+        override:
+          - py-scrutinizer-run
