@@ -1,9 +1,7 @@
-imports:
-    - php
-
 filter:
     excluded_paths:
-        - "manage.py"
+        - '*/test/*'
+        - '*/migrations/*'
 
 checks:
     python:
@@ -11,8 +9,14 @@ checks:
         duplicate_code: true
 
 build:
-  nodes:
-    analysis:
-      tests:
-        override:
-          - py-scrutinizer-run
+    nodes:
+        analysis:
+            project_setup:
+                override:
+                    - 'true'
+            tests:
+                override:
+                    - py-scrutinizer-run
+                    -
+                        command: pylint-run
+                        use_website_config: true
