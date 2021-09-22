@@ -8,13 +8,13 @@ checks:
         code_rating: true
         duplicate_code: true
 
-
 build:
     nodes:
         coverage:
           tests:
             override:
               - command: 'python manage.py test'
+              - command: 'coverage report'
                 coverage:
                   file: '.coverage'
                   config_file: '.coveragerc'
