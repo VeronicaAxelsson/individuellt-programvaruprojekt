@@ -8,16 +8,19 @@ checks:
         code_rating: true
         duplicate_code: true
 
+
 build:
     nodes:
+        coverage:
+          tests:
+            override:
+              - command: './run-tests.sh'
+                coverage:
+                  file: '.coverage'
+                  config_file: '.coveragerc'
+                  format: 'py-cc'
         analysis:
             project_setup:
-                override:
-                    - 'true'
-                  tests:
-                    override:
-                      - command: './run-tests.sh'
-                        coverage:
-                          file: '.coverage'
-                          config_file: '.coveragerc'
-                          format: 'py-cc'
+                override: true
+            tests:
+                override: [py-scrutinizer-run]
