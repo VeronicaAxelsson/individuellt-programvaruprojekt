@@ -13,8 +13,9 @@ build:
         coverage:
           tests:
             override:
-              - command: 'python manage.py test'
+              - command: 'coverage run manage.py test'
               - command: 'coverage report'
+              - command: 'coverage html'
                 coverage:
                   file: '.coverage'
                   config_file: '.coveragerc'
