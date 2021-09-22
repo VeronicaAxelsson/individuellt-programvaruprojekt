@@ -4,3 +4,8 @@
 __pycache__
 db.sqlite3
 media
+
+coverage_html_report/
+.coverage.*
+coverage.xml
+*.cover

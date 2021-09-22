@@ -14,9 +14,10 @@ build:
             project_setup:
                 override:
                     - 'true'
-            tests:
-                override:
-                    - py-scrutinizer-run
-                    -
-                        command: pylint-run
-                        use_website_config: true
+                  tests:
+                    override:
+                      - command: './run-tests.sh'
+                        coverage:
+                          file: '.coverage'
+                          config_file: '.coveragerc'
+                          format: 'py-cc'
