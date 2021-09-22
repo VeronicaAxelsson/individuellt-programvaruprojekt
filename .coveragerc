@@ -1,7 +1,7 @@
 # .coveragerc to control coverage.py
 [run]
 source = .
-omit = */node_modules/*
+omit = venv/*
 branch = True
 plugins = django_coverage_plugin
 

@@ -14,7 +14,7 @@ build:
         coverage:
           tests:
             override:
-              - command: './run-tests.sh'
+              - command: 'coverage run manage.py test'
                 coverage:
                   file: '.coverage'
                   config_file: '.coveragerc'

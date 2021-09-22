@@ -6,6 +6,7 @@ db.sqlite3
 media
 
 coverage_html_report/
+.coverage
 .coverage.*
 coverage.xml
 *.cover
