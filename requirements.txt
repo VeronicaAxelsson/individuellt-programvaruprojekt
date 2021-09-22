@@ -3,7 +3,7 @@ astroid==2.8.0
 colorama==0.4.4
 coverage==5.5
 Django==3.2.7
-django-coverage-plugin==2.0.0
+# django-coverage-plugin==2.0.0
 isort==5.9.3
 lazy-object-proxy==1.6.0
 mccabe==0.6.1
