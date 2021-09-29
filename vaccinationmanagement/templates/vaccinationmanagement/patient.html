@@ -1,14 +1,40 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head>
-        <meta charset="utf-8">
-        <title></title>
-    </head>
-    <body>
-        {% if patient_id %}
-            <p>Patient {{ patient_id }} vaccins.</p>
-        {% else %}
-            <p>Patient does not excist.</p>
-        {% endif %}
-    </body>
-</html>
+{% extends "vaccinationmanagement/includes/base.html" %}
+
+{% block content %}
+    <h1>{{ patient_id }}</h1>
+    <p>SOCIAL SECURITY NUMBER:</p>
+    <p>ADRESS:</p>
+    <p>TEL:</p>
+    <p>EMAIL:</p>
+    <form class="search" action="{% url 'search-vaccination' patient_id=1 %}" method="post">
+        {% csrf_token %}
+        <input type="text" value="search">
+        <input type="submit" value="search">
+    </form>
+    <a class="button" href="{% url 'add-vaccination' patient_id=patient_id %}">+ ADD VACCIN</a>
+    <table>
+    <tr>
+        <th>VACCIN</th>
+        <th>NUMBER OF DOSES TAKEN</th>
+        <th>DATE FOR LATEST DOSE</th>
+        <th>DATE FOR NEXT DOSE</th>
+        <th></th>
+    </tr>
+<!-- <% for (const row of showAll) { %> -->
+    <tr>
+        <td>FSME-IMMUN Vuxen</td>
+        <td>4</td>
+        <td>21-04-13</td>
+        <td>25-04-13</td>
+        <td><a href="{% url 'add-dose' patient_id=1 vaccination_id=1 %}">ADD DOSE</a><br> ABOUT VACCIN</td>
+    </tr>
+    <tr>
+        <td>FSME-IMMUN Vuxen</td>
+        <td>4</td>
+        <td>21-04-13</td>
+        <td>25-04-13</td>
+        <td>ADD DOSE <br> ABOUT VACCIN</td>
+    </tr>
+<!-- <% }; %> -->
+</table>
+<p>Uppcomming booster vaccination within 2 months are marked with red.</p>{% endblock content %}

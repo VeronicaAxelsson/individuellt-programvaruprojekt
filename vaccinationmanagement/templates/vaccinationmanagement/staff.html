@@ -1,0 +1,12 @@
+{% extends "vaccinationmanagement/includes/base.html" %}
+
+{% block content %}
+    <h1>Welcome username</h1>
+    <p>Your are logged in as:</p>
+    <div class="container">
+        <h2>Calendar</h2>
+        <p>Check the calendar to see your patients upcomming booster vaccinations.</p>
+    </div>
+    <a class="button front-page-button" href="{% url 'patients' %}">Patients</a>
+    <a class="button front-page-button" href="{% url 'vaccins' %}">List of vaccins</a>
+{% endblock content %}

@@ -1,0 +1,18 @@
+{% extends "vaccinationmanagement/includes/base.html" %}
+
+{% block content %}
+    <h1>Patients</h1>
+    <div class="container">
+        <h2>Add patient</h2>
+        <form class="add-form" action="{% url 'add-patient' %}" method="post">
+            {% csrf_token %}
+            <div class="form-div">
+                <label for="">Search for patient with name och personal security number</label>
+                <input type="text" name="patient" value="">
+            </div>
+            <div class="form-div form-submit">
+                <input class="button" type="submit" value="add patient">
+            </div>
+        </form>
+    </div>
+{% endblock content %}

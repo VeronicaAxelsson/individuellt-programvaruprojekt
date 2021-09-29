@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <link href="{% static 'vaccinationmanagement/css/main.css' %}" rel="stylesheet" type="text/css" />
+        <title></title>
+    </head>
+    <body>
+        <header>
+            <p class="logo">Vaccination Management</p>
+            {% if request.user.is_authenticated %}
+            <nav>
+                <a href="{% url 'staff' %}">Home</a>
+                <a href="{% url 'patients' %}">Patients</a>
+                <a href="{% url 'vaccins' %}">Vaccins</a>
+            </nav>
+                <p class="header-text">{{ request.user.username }}</p>
+                <form class="logout-form header-text" action="{% url 'logout-user' %}" method="post">
+                    {% csrf_token %}
+                    <input class="logout-button" type="submit" value="Logout">
+                </form>
+            {% endif %}
+        </header>
+        {% block content %}{% endblock content %}
+</body>
+</html>

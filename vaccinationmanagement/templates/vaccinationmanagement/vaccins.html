@@ -1,0 +1,24 @@
+{% extends "vaccinationmanagement/includes/base.html" %}
+
+{% block content %}
+    <h1>VACCINS</h1>
+    <form class="search" action="{% url 'search-vaccin' vaccin_id=1 %}" method="post">
+        {% csrf_token %}
+        <input type="text" value="search">
+        <input type="submit" value="search">
+    </form>
+    <table>
+    <tr>
+        <th>VACCIN</th>
+        <th>PROTECTS AGAINST</th>
+        <th></th>
+    </tr>
+    {% for vaccin in data %}
+    <tr>
+        <td>{{vaccin.vaccin_name}}</td>
+        <td>{{vaccin.protects_against}}</td>
+        <td><a href="{{vaccin.info_url}}">INFORMATION ABOUT VACCIN</a></td>
+    </tr>
+    {% endfor%}
+</table>
+{% endblock content %}
