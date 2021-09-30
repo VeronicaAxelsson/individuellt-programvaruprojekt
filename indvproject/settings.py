@@ -37,8 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'sass_processor'
+    'django.contrib.staticfiles'
 ]
 
 MIDDLEWARE = [
@@ -58,8 +57,6 @@ STATICFILES_FINDERS = [
 ]
 
 STATIC_ROOT = BASE_DIR / 'static'
-
-SASS_PROCESSOR_ROOT = STATIC_ROOT
 
 ROOT_URLCONF = 'indvproject.urls'
 
