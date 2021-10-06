@@ -3,7 +3,7 @@
 {% block content %}
     <h1>Patients</h1>
     <div class="container">
-        <form class="add-form" action="{% url 'add-dose' patient_id=1 vaccination_id=1 %}" method="post">
+        <form class="add-form" action="{% url 'add-dose' patient_id=patient_id vaccination_id=vaccination_id %}" method="post">
             {% csrf_token %}
             <div class="form-div">
                 <label for="">Dose number</label>
@@ -11,15 +11,15 @@
             </div>
             <div class="form-div form-date-1">
                 <label for="">Date</label>
-                <input type="date" name="date1" value="">
+                <input type="date" name="date_of_vaccination" value="">
             </div>
             <div class="form-div form-date-2">
                 <label for="">Date for next dose</label>
-                <input type="date" name="date2" value="">
+                <input type="date" name="date_of_next_vaccination" value="">
             </div>
             <div class="form-div form-check">
                 <label for="">Last dose (check the box instead of filling in date for next dose)</label>
-                <input type="checkbox" name="done" value="done">
+                <input type="checkbox" name="vaccination_done" value="done">
             </div>
             <div class="form-div form-submit">
                 <input type="hidden" name="patient_id" value="{{patient_id}}">

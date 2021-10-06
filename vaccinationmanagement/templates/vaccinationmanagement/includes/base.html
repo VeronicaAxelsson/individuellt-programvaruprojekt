@@ -1,4 +1,5 @@
 {% load static %}
+{% load vaccinationmanagement_extras %}
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
     <head>
@@ -8,13 +9,15 @@
     </head>
     <body>
         <header>
-            <p class="logo">Vaccination Management</p>
+            <a class="logo" href="{% url 'index' %}">Vaccination Management</a>
             {% if request.user.is_authenticated %}
-            <nav>
-                <a href="{% url 'staff' %}">Home</a>
-                <a href="{% url 'patients' %}">Patients</a>
-                <a href="{% url 'vaccins' %}">Vaccins</a>
-            </nav>
+                {% if request.user|has_group:"staff" %}
+                <nav>
+                    <a href="{% url 'staff' %}">Home</a>
+                    <a href="{% url 'patients' %}">Patients</a>
+                    <a href="{% url 'vaccins' %}">Vaccins</a>
+                </nav>
+                {% endif %}
                 <p class="header-text">{{ request.user.username }}</p>
                 <form class="logout-form header-text" action="{% url 'logout-user' %}" method="post">
                     {% csrf_token %}

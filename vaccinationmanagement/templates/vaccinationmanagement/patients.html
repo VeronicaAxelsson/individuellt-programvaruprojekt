@@ -2,9 +2,9 @@
 
 {% block content %}
     <h1>Patients</h1>
-    <form class="search" action="{% url 'search-patient' patient_id=1 %}" method="post">
+    <form class="search" action="{% url 'patients' %}" method="post">
         {% csrf_token %}
-        <input type="text" value="search">
+        <input type="text" name="search-patient">
         <input type="submit" value="search">
     </form>
     <a class="button" href="{% url 'add-patient' %}">+ ADD PATIENT</a>
@@ -15,20 +15,25 @@
         <th>UPPCOMMING BOOSTER VACCINATION</th>
         <th></th>
     </tr>
-<!-- <% for (const row of showAll) { %> -->
+    {% if searched %}
+    {% for patient in searched_patients %}
     <tr>
-        <td>111111-xxxx</td>
-        <td>Per Persson</td>
+        <td>{{ patient.social_security_nr }}</td>
+        <td>{{patient.first_name}} {{patient.last_name}}</td>
         <td>Yes</td>
-        <td><a href="{% url 'patient' patient_id=1 %}">GO TO PATIENT</a></td>
+        <td><a href="{% url 'patient' patient_id=patient.patient_id %}">GO TO PATIENT</a></td>
     </tr>
+    {% endfor %}
+    {% else %}
+        {% for patient in data %}
     <tr>
-        <td>111111-xxxx</td>
-        <td>Per Persson</td>
+        <td>{{ patient.social_security_nr }}</td>
+        <td>{{patient.first_name}} {{patient.last_name}}</td>
         <td>Yes</td>
-        <td>GO TO PATIENT</td>
+        <td><a href="{% url 'patient' patient_id=patient.patient_id %}">GO TO PATIENT</a></td>
     </tr>
-<!-- <% }; %> -->
+    {% endfor %}
+{% endif %}
 </table>
 <p>Uppcomming booster vaccination refers to booster vaccination within two months</p>
 {% endblock content %}

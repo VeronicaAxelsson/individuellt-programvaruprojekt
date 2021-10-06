@@ -12,21 +12,33 @@
     <a class="button front-page-button" href="{% url 'login-staff' %}">Login as medical staff</a>
     <a class="button front-page-button" href="{% url 'login-private' %}">Login as private person</a>
     {% endif %}
-    {% if staff_login %}
-        <form class="site-form" action="{% url 'login-staff'%}" method="post">
-            {% csrf_token %}
-            {{ form }}
-            <input class="button" type="submit" value="Login">
-        </form>
-        <a href="{% url 'login-private' %}">Login as private person</a>
-    {% endif %}
     {% if private_login %}
-        <form class="site-form" action="{% url 'login-staff'%}" method="post">
+        <h2>Log in as private person</h2>
+        {% for message in messages %}
+                 <div class="alert alert-success">
+                     {{ message }}
+                 </div>
+         {% endfor %}
+        <form class="site-form" action="{% url 'login-private' %}" method="post">
             {% csrf_token %}
             {{ form }}
             <input class="button" type="submit" value="Login">
         </form>
         <a href="{% url 'login-staff' %}">Login as medical staff</a>
+    {% endif %}
+    {% if staff_login %}
+        <h2>Log in as medical staff</h2>
+        {% for message in messages %}
+                 <div class="alert alert-success">
+                     {{ message }}
+                 </div>
+         {% endfor %}
+        <form class="site-form" action="{% url 'login-staff' %}" method="post">
+            {% csrf_token %}
+            {{ form }}
+            <input class="button" type="submit" value="Login">
+        </form>
+        <a href="{% url 'login-private' %}">Login as private person</a>
     {% endif %}
 </div>
 

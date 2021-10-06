@@ -1,18 +1,12 @@
 {% extends "vaccinationmanagement/includes/base.html" %}
 
 {% block content %}
-
-    <h1>{{ patient.first_name }} {{ patient.last_name }}</h1>
-    <p>SOCIAL SECURITY NUMBER: {{ patient.social_security_nr }}</p>
-    <p>ADRESS: {{ patient.adress }}</p>
-    <p>TEL: {{ patient.tel_nr }}</p>
-    <p>EMAIL: {{ patient.email }}</p>
-    <form class="search" action="{% url 'patient' patient_id=patient_id %}" method="post">
+    <h1>Your Vaccinations</h1>
+    <form class="search" action="{% url 'vaccinations' %}" method="post">
         {% csrf_token %}
         <input type="text" name="search-vaccinations">
         <input type="submit" value="search">
     </form>
-    <a class="button" href="{% url 'add-vaccination' patient_id=patient_id %}">+ ADD VACCIN</a>
     <table>
     <tr>
         <th>VACCIN</th>
@@ -28,7 +22,6 @@
     <td>{{ vaccination.dose_nr }}</td>
     <td>{{ vaccination.date_of_vaccination }}</td>
     <td>{{ vaccination.date_of_next_vaccination }}</td>
-    <td><a href="{% url 'add-dose' patient_id=patient_id vaccination_id=vaccination.vaccination_id %}">ADD DOSE</a><br> ABOUT VACCIN</td>
 </tr>
 {% endfor %}
 {% else %}
@@ -38,7 +31,6 @@
         <td>{{ vaccination.dose_nr }}</td>
         <td>{{ vaccination.date_of_vaccination }}</td>
         <td>{{ vaccination.date_of_next_vaccination }}</td>
-        <td><a href="{% url 'add-dose' patient_id=patient_id vaccination_id=vaccination.vaccination_id %}">ADD DOSE</a><br> ABOUT VACCIN</td>
     </tr>
 {% endfor %}
 {% endif %}

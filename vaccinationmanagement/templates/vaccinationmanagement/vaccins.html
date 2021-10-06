@@ -2,9 +2,9 @@
 
 {% block content %}
     <h1>VACCINS</h1>
-    <form class="search" action="{% url 'search-vaccin' vaccin_id=1 %}" method="post">
+    <form class="search" action="{% url 'vaccins' %}" method="post">
         {% csrf_token %}
-        <input type="text" value="search">
+        <input type="text" name="search-vaccin">
         <input type="submit" value="search">
     </form>
     <table>
@@ -13,6 +13,15 @@
         <th>PROTECTS AGAINST</th>
         <th></th>
     </tr>
+    {% if searched %}
+    {% for vaccin in searched_vaccins%}
+    <tr>
+        <td>{{vaccin.vaccin_name}}</td>
+        <td>{{vaccin.protects_against}}</td>
+        <td><a href="{{vaccin.info_url}}">INFORMATION ABOUT VACCIN</a></td>
+    </tr>
+    {% endfor %}
+    {% else %}
     {% for vaccin in data %}
     <tr>
         <td>{{vaccin.vaccin_name}}</td>
@@ -20,5 +29,6 @@
         <td><a href="{{vaccin.info_url}}">INFORMATION ABOUT VACCIN</a></td>
     </tr>
     {% endfor%}
+    {% endif %}
 </table>
 {% endblock content %}
