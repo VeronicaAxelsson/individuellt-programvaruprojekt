@@ -18,3 +18,4 @@ sqlparse==0.4.2
 toml==0.10.2
 typing-extensions==3.10.0.2
 wrapt==1.12.1
+fontawesomefree==5.15.3
