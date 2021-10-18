@@ -1,0 +1,89 @@
+{% extends "vaccinationmanagement/includes/base.html" %}
+
+{% load vaccinationmanagement_extras %}
+{% block content %}
+    <div class="page-header">
+        {{vaccinations}}
+        <h1>{{ patient.first_name }} {{ patient.last_name }}</h1>
+        <p><b>SOCIAL SECURITY NUMBER:</b> {{ patient.social_security_nr }}</p>
+        <p><b>ADRESS:</b> {{ patient.adress }}</p>
+        <p><b>TEL:</b> {{ patient.tel_nr }}</p>
+        <p><b>EMAIL:</b> {{ patient.email }}</p>
+    </div>
+    <div class="search-container">
+        <form class="search" action="{% url 'patient' patient_id=patient_id %}" method="post">
+            {% csrf_token %}
+            <input type="text" name="search-vaccinations">
+            <input class="button" type="submit" value="search">
+            <a class="button" href="{% url 'add-vaccination' patient_id=patient_id %}">+ ADD VACCIN</a>
+        </form>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>VACCIN</th>
+                <th>NUMBER OF DOSES TAKEN</th>
+                <th>DATE FOR LATEST DOSE</th>
+                <th>DATE FOR NEXT DOSE</th>
+                <th>NOTE</th>
+                <th></th>
+            </tr>
+        </thead>
+{% if searched %}
+{% for vaccination in searched_vaccinations %}
+{{vaccination.uppcomming_booster}}
+<tbody>
+    <tr>
+        <td>{{ vaccination.vaccin }}</td>
+        <td>{{ vaccination.dose_nr }}</td>
+        <td>{{ vaccination.date_of_vaccination }}</td>
+        {% if vaccination.date_of_next_vaccination is None %}
+        <td>Done</td>
+        {% else %}
+            {% if vaccination.uppcomming_booster %}
+            <td class="red">{{ vaccination.date_of_next_vaccination }}</td>
+            {% else %}
+            <td>{{ vaccination.date_of_next_vaccination }}</td>
+            {% endif %}
+        {% endif %}
+        <td>{{ vaccination.note }}</td>
+        {% if vaccination.date_of_next_vaccination is None %}
+        <td><a href="{{vaccination.vaccin.info_url}}">ABOUT VACCIN</a></td>
+        {% else %}
+        <td><a href="{% url 'add-dose' patient_id=patient_id vaccination_id=vaccination.vaccination_id %}">ADD DOSE</a><br><a href="{{vaccination.vaccin.info_url}}">ABOUT VACCIN</a></td>
+        {% endif %}
+    </tr>
+</tbody>
+{% endfor %}
+{% else %}
+{% for vaccin_id in vaccinations %}
+{{vaccin_id}}
+{% for vaccination in vaccinations|get_item:vaccin_id %}
+<tbody>
+    <tr>
+        <td>{{ vaccination.vaccin }}</td>
+        <td>{{ vaccination.dose_nr }}</td>
+        <td>{{ vaccination.date_of_vaccination }}</td>
+        {% if vaccination.date_of_next_vaccination is None %}
+        <td>Done</td>
+        {% else %}
+            {% if vaccination.uppcomming_booster %}
+            <td class="red">{{ vaccination.date_of_next_vaccination }}</td>
+            {% else %}
+            <td>{{ vaccination.date_of_next_vaccination }}</td>
+            {% endif %}
+        {% endif %}
+        <td>{{ vaccination.note }}</td>
+        {% if vaccination.date_of_next_vaccination is None %}
+        <td><a href="{{vaccination.vaccin.info_url}}">ABOUT VACCIN</a></td>
+        {% else %}
+        <td><a href="{% url 'add-dose' patient_id=patient_id vaccination_id=vaccination.vaccination_id %}">ADD DOSE</a><br><a href="{{vaccination.vaccin.info_url}}">ABOUT VACCIN</a></td>
+        {% endif %}
+    </tr>
+</tbody>
+{% endfor %}
+{% endfor %}
+{% endif %}
+</table>
+<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination within 2 months are marked with red.</p>
+{% endblock content %}

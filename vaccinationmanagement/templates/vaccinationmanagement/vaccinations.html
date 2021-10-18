@@ -1,39 +1,47 @@
 {% extends "vaccinationmanagement/includes/base.html" %}
+{% load vaccinationmanagement_extras %}
 
 {% block content %}
     <h1>Your Vaccinations</h1>
-    <form class="search" action="{% url 'vaccinations' %}" method="post">
-        {% csrf_token %}
-        <input type="text" name="search-vaccinations">
-        <input type="submit" value="search">
-    </form>
+    <div class="search-container">
+        <form class="search" action="{% url 'vaccinations' %}" method="post">
+            {% csrf_token %}
+            <input type="text" name="search-vaccinations">
+            <input class="button" type="submit" value="search">
+        </form>
+    </div>
     <table>
-    <tr>
-        <th>VACCIN</th>
-        <th>NUMBER OF DOSES TAKEN</th>
-        <th>DATE FOR LATEST DOSE</th>
-        <th>DATE FOR NEXT DOSE</th>
-        <th></th>
-    </tr>
-{% if searched %}
-{% for vaccination in searched_vaccinations %}
-<tr>
-    <td>{{ vaccination.vaccin }}</td>
-    <td>{{ vaccination.dose_nr }}</td>
-    <td>{{ vaccination.date_of_vaccination }}</td>
-    <td>{{ vaccination.date_of_next_vaccination }}</td>
-</tr>
-{% endfor %}
-{% else %}
-{% for vaccination in vaccinations %}
-    <tr>
-        <td>{{ vaccination.vaccin }}</td>
-        <td>{{ vaccination.dose_nr }}</td>
-        <td>{{ vaccination.date_of_vaccination }}</td>
-        <td>{{ vaccination.date_of_next_vaccination }}</td>
-    </tr>
-{% endfor %}
-{% endif %}
-</table>
-<p>Uppcomming booster vaccination within 2 months are marked with red.</p>
+        <thead>
+            <tr>
+                <th>VACCIN</th>
+                <th>NUMBER OF DOSES TAKEN</th>
+                <th>DATE FOR LATEST DOSE</th>
+                <th>DATE FOR NEXT DOSE</th>
+                <th>NOTE</th>
+                <th></th>
+            </tr>
+        </thead>
+    {% for vaccin_id in vaccinations %}
+    {% for vaccination in vaccinations|get_item:vaccin_id %}
+    <tbody>
+        <tr>
+            <td>{{ vaccination.vaccin }}</td>
+            <td>{{ vaccination.dose_nr }}</td>
+            <td>{{ vaccination.date_of_vaccination }}</td>
+            {% if vaccination.date_of_next_vaccination is None %}
+            <td>Done</td>
+            {% else %}
+                {% if vaccination.uppcomming_booster %}
+                <td class="red">{{ vaccination.date_of_next_vaccination }}</td>
+                {% else %}
+                <td>{{ vaccination.date_of_next_vaccination }}</td>
+                {% endif %}
+            {% endif %}
+            <td>{{ vaccination.note }}</td>
+            <td><a href="{% url 'private-vaccination-history' patient_id=patient_id vaccin_id=vaccination.vaccin.vaccin_id %}">VIEW HISTORY</a></td>
+        </tr>
+    </tbody>{% endfor %}
+    {% endfor %}
+    </table>
+<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination within 2 months are marked with red.</p>
 {% endblock content %}

@@ -1,24 +1,22 @@
 {% extends "vaccinationmanagement/includes/base.html" %}
 
 {% block content %}
-{{patients}}
-    <h1>Patients</h1>
     <div class="container">
         <h2>Add patient</h2>
         <form class="add-form" action="{% url 'add-patient' %}" method="post">
             {% csrf_token %}
             <div class="form-div">
                 <label for="">Search for patient with name och personal security number</label>
-                <input type="text" name="patient" value="" list="patientList">
-                <datalist id="patientList">
+                <!-- <input type="text" name="patient" value="" list="patientList"> -->
+                <select name="patient" id="patientList">
                     {% for patient in patients %}
-                    <option name="addPatient">{{patient.first_name}} {{patient.last_name}}, {{patient.social_security_nr}}</option>
-                    <input type="hidden" name="addPatient" value="{{patient.patient_id}}">
+                    <option value="{{patient.patient_id}}">{{patient.first_name}} {{patient.last_name}}, {{patient.social_security_nr}}</option>
+                    <!-- <input type="hidden" name="addPatient" value="{{patient.patient_id}}"> -->
                     {% endfor %}
-                </datalist>
+                </select>
             </div>
             <div class="form-div form-submit">
-                <input class="button" type="submit" value="add patient">
+                <input class="front-page-button button" type="submit" value="add patient">
             </div>
         </form>
     </div>

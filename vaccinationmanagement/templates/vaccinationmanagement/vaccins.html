@@ -2,33 +2,29 @@
 
 {% block content %}
     <h1>VACCINS</h1>
+    <div class="search-container">
     <form class="search" action="{% url 'vaccins' %}" method="post">
         {% csrf_token %}
         <input type="text" name="search-vaccin">
-        <input type="submit" value="search">
+        <input class="button" type="submit" value="search">
     </form>
+    </div>
     <table>
-    <tr>
-        <th>VACCIN</th>
-        <th>PROTECTS AGAINST</th>
-        <th></th>
-    </tr>
-    {% if searched %}
-    {% for vaccin in searched_vaccins%}
-    <tr>
-        <td>{{vaccin.vaccin_name}}</td>
-        <td>{{vaccin.protects_against}}</td>
-        <td><a href="{{vaccin.info_url}}">INFORMATION ABOUT VACCIN</a></td>
-    </tr>
-    {% endfor %}
-    {% else %}
-    {% for vaccin in data %}
-    <tr>
-        <td>{{vaccin.vaccin_name}}</td>
-        <td>{{vaccin.protects_against}}</td>
-        <td><a href="{{vaccin.info_url}}">INFORMATION ABOUT VACCIN</a></td>
-    </tr>
+        <thead>
+            <tr>
+                <th>VACCIN</th>
+                <th>PROTECTS AGAINST</th>
+                <th></th>
+            </tr>
+        </thead>
+    {% for vaccin in vaccins %}
+    <tbody>
+        <tr>
+            <td>{{vaccin.vaccin_name}}</td>
+            <td>{{vaccin.protects_against}}</td>
+            <td><a href="{{vaccin.info_url}}">INFORMATION ABOUT VACCIN</a></td>
+        </tr>
+    </tbody>
     {% endfor%}
-    {% endif %}
 </table>
 {% endblock content %}

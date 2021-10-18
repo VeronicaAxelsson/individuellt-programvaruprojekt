@@ -1,0 +1,11 @@
+{% extends "vaccinationmanagement/includes/base.html" %}
+
+{% block content %}
+    <div id="content-container" class="container p-none">
+        <div class="side-p">
+            <p>Are you sure you want to remove the patient from your patient list?</p>
+            <a href="{% url 'remove-patient' patient_id=patient.patient_id %}">Yes</a>
+            <a href="{% url 'patients' %}"></a>
+        </div>
+    </div>
+{% endblock %}

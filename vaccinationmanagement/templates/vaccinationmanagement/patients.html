@@ -2,38 +2,39 @@
 
 {% block content %}
     <h1>Patients</h1>
-    <form class="search" action="{% url 'patients' %}" method="post">
-        {% csrf_token %}
-        <input type="text" name="search-patient">
-        <input type="submit" value="search">
-    </form>
-    <a class="button" href="{% url 'add-patient' %}">+ ADD PATIENT</a>
+    <div class="search-container">
+        <form class="search" action="{% url 'patients' %}" method="post">
+            {% csrf_token %}
+            <input type="text" name="search-patient">
+            <input class="button" type="submit" value="search">
+            <a class="button" href="{% url 'add-patient' %}">+ add patient</a>
+        </form>
+    </div>
     <table>
-    <tr>
-        <th>SOCIAL SECURITY NUMBER</th>
-        <th>NAME</th>
-        <th>UPPCOMMING BOOSTER VACCINATION</th>
-        <th></th>
-    </tr>
-    {% if searched %}
-    {% for patient in searched_patients %}
-    <tr>
-        <td>{{ patient.social_security_nr }}</td>
-        <td>{{patient.first_name}} {{patient.last_name}}</td>
-        <td>Yes</td>
-        <td><a href="{% url 'patient' patient_id=patient.patient_id %}">GO TO PATIENT</a></td>
-    </tr>
+        <thead>
+            <tr>
+                <th>SOCIAL SECURITY NUMBER</th>
+                <th>NAME</th>
+                <th>UPPCOMMING BOOSTER VACCINATION</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        {% for patient in staffs_patients %}
+        <tbody>
+            <tr>
+                <td>{{ patient.social_security_nr }}</td>
+                <td>{{patient.first_name}} {{patient.last_name}}</td>
+                {% if patient.upcomming_booster %}
+                <td>Yes</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+                <td><a href="{% url 'patient' patient_id=patient.patient_id %}">GO TO PATIENT</a></td>
+                <td><a href="{% url 'remove-patient' patient_id=patient.patient_id %}"><i class="fas fa-trash-alt"></i></a></td>
+            </tr>
+        </tbody>
     {% endfor %}
-    {% else %}
-        {% for patient in data %}
-    <tr>
-        <td>{{ patient.social_security_nr }}</td>
-        <td>{{patient.first_name}} {{patient.last_name}}</td>
-        <td>Yes</td>
-        <td><a href="{% url 'patient' patient_id=patient.patient_id %}">GO TO PATIENT</a></td>
-    </tr>
-    {% endfor %}
-{% endif %}
 </table>
-<p>Uppcomming booster vaccination refers to booster vaccination within two months</p>
+<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination refers to booster vaccination within two months</p>
 {% endblock content %}

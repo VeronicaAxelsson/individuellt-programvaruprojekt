@@ -1,7 +1,6 @@
 {% extends "vaccinationmanagement/includes/base.html" %}
 
 {% block content %}
-    <h1>Patients</h1>
     <div class="container">
         <h2>Add vaccination with new vaccin</h2>
         <form class="add-form" action="{% url 'add-vaccination' patient_id=patient_id %}" method="post">
@@ -16,11 +15,15 @@
             </div>
             <div class="form-div">
                 <label for="">Dose number</label>
-                <input type="text" name="dose_nr" value="">
+                <input type="number" name="dose_nr" value="1" required>
+            </div>
+            <div class="form-div">
+                <label for="">Note</label>
+                <input type="text" name="note" value="">
             </div>
             <div class="form-div form-date-1">
                 <label for="">Date</label>
-                <input type="date" name="date_of_vaccination" value="">
+                <input type="date" name="date_of_vaccination" value="" required>
             </div>
             <div class="form-div form-date-2">
                 <label for="">Date for next dose</label>
@@ -32,7 +35,7 @@
             </div>
             <div class="form-div form-submit">
                 <input type="hidden" name="patient" value="{{patient_id}}">
-                <input class="button" type="submit" value="add vaccination">
+                <input class="front-page-button button" type="submit" value="add vaccination">
             </div>
         </form>
     </div>

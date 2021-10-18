@@ -1,11 +1,16 @@
 {% extends "vaccinationmanagement/includes/base.html" %}
 
 {% block content %}
-    <h1>Welcome username</h1>
-    <p>Your are logged in as:</p>
-    <div class="container">
+<div class="page-header">
+    <h1>{{user.first_name}} {{user.last_name}}</h1>
+    <p><b>SOCIAL SECURITY NUMBER:</b> {{ patient.social_security_nr }}</p>
+    <p><b>ADRESS:</b> {{ patient.adress }}</p>
+    <p><b>TEL:</b> {{ patient.tel_nr }}</p>
+    <p><b>EMAIL:</b> {{ patient.email }}</p>
+</div>
+    <!-- <div class="container">
         <h2>Calendar</h2>
         <p>Check the calendar to see your patients upcomming booster vaccinations.</p>
-    </div>
+    </div> -->
     <a class="button front-page-button" href="{% url 'vaccinations' %}">Your vaccins</a>
 {% endblock content %}

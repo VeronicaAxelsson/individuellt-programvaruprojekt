@@ -1,47 +1,23 @@
 {% extends "vaccinationmanagement/includes/base.html" %}
 
+{% load vaccinationmanagement_extras %}
 {% block content %}
+    <div class="page-header">
+        <h1>{{ patient.first_name }} {{ patient.last_name }}</h1>
+        <p><b>SOCIAL SECURITY NUMBER:</b> {{ patient.social_security_nr }}</p>
+        <p><b>ADRESS:</b> {{ patient.adress }}</p>
+        <p><b>TEL:</b> {{ patient.tel_nr }}</p>
+        <p><b>EMAIL:</b> {{ patient.email }}</p>
+    </div>
+    <div class="search-container">
+        <form class="search" action="{% url 'patient' patient_id=patient_id %}" method="post">
+            {% csrf_token %}
+            <input type="text" name="search-vaccinations">
+            <input class="button" type="submit" value="search">
+            <a class="button" href="{% url 'add-vaccination' patient_id=patient_id %}">+ ADD VACCIN</a>
+        </form>
+    </div>
+    {% include "vaccinationmanagement/tables/vaccinations-table.html" %}
 
-    <h1>{{ patient.first_name }} {{ patient.last_name }}</h1>
-    <p>SOCIAL SECURITY NUMBER: {{ patient.social_security_nr }}</p>
-    <p>ADRESS: {{ patient.adress }}</p>
-    <p>TEL: {{ patient.tel_nr }}</p>
-    <p>EMAIL: {{ patient.email }}</p>
-    <form class="search" action="{% url 'patient' patient_id=patient_id %}" method="post">
-        {% csrf_token %}
-        <input type="text" name="search-vaccinations">
-        <input type="submit" value="search">
-    </form>
-    <a class="button" href="{% url 'add-vaccination' patient_id=patient_id %}">+ ADD VACCIN</a>
-    <table>
-    <tr>
-        <th>VACCIN</th>
-        <th>NUMBER OF DOSES TAKEN</th>
-        <th>DATE FOR LATEST DOSE</th>
-        <th>DATE FOR NEXT DOSE</th>
-        <th></th>
-    </tr>
-{% if searched %}
-{% for vaccination in searched_vaccinations %}
-<tr>
-    <td>{{ vaccination.vaccin }}</td>
-    <td>{{ vaccination.dose_nr }}</td>
-    <td>{{ vaccination.date_of_vaccination }}</td>
-    <td>{{ vaccination.date_of_next_vaccination }}</td>
-    <td><a href="{% url 'add-dose' patient_id=patient_id vaccination_id=vaccination.vaccination_id %}">ADD DOSE</a><br> ABOUT VACCIN</td>
-</tr>
-{% endfor %}
-{% else %}
-{% for vaccination in vaccinations %}
-    <tr>
-        <td>{{ vaccination.vaccin }}</td>
-        <td>{{ vaccination.dose_nr }}</td>
-        <td>{{ vaccination.date_of_vaccination }}</td>
-        <td>{{ vaccination.date_of_next_vaccination }}</td>
-        <td><a href="{% url 'add-dose' patient_id=patient_id vaccination_id=vaccination.vaccination_id %}">ADD DOSE</a><br> ABOUT VACCIN</td>
-    </tr>
-{% endfor %}
-{% endif %}
-</table>
-<p>Uppcomming booster vaccination within 2 months are marked with red.</p>
+<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination within 2 months are marked with red.</p>
 {% endblock content %}

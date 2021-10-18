@@ -1,0 +1,42 @@
+{% extends "vaccinationmanagement/includes/base.html" %}
+
+{% load vaccinationmanagement_extras %}
+{% block content %}
+<div class="page-header">
+    <h2>Vaccin: {{ vaccin.vaccin_name }}</h2>
+    <p><b>PATIENT: </b>{{ patient.first_name }} {{ patient.last_name }}</p>
+    <p><b>SOCIAL SECURITY NUMBER:</b> {{ patient.social_security_nr }}</p>
+    <p><b>ADRESS:</b> {{ patient.adress }}</p>
+    <p><b>TEL:</b> {{ patient.tel_nr }}</p>
+    <p><b>EMAIL:</b> {{ patient.email }}</p>
+</div>
+    <table>
+        <thead>
+            <tr>
+                <th>DOSE NUMBER</th>
+                <th>DATE OF VACCINATION</th>
+                <th>DATE FOR NEXT DOSE</th>
+                <th>NOTE</th>
+            </tr>
+        </thead>
+{% for vaccination in vaccinations %}
+<tbody>
+    <tr>
+        <td>{{ vaccination.dose_nr }}</td>
+        <td>{{ vaccination.date_of_vaccination }}</td>
+        {% if vaccination.date_of_next_vaccination is None %}
+        <td>Done</td>
+        {% else %}
+            {% if vaccination.uppcomming_booster %}
+            <td class="red">{{ vaccination.date_of_next_vaccination }}</td>
+            {% else %}
+            <td>{{ vaccination.date_of_next_vaccination }}</td>
+            {% endif %}
+        {% endif %}
+        <td>{{ vaccination.note }}</td>
+    </tr>
+</tbody>
+{% endfor %}
+</table>
+<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination within 2 months are marked with red.</p>
+{% endblock content %}
