@@ -13,182 +13,301 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib import messages
+import datetime
 
 def index(request):
     if request.user.groups.filter(name="staff").exists():
         return redirect('staff')
     if request.user.groups.filter(name="patient").exists():
         return redirect('private')
-    return render(request, 'vaccinationmanagement/index.html', {'start_page': 'start-page'})
+    context = {
+        'start_page': 'start-page'
+    }
+    return render(request, 'vaccinationmanagement/index.html', context)
 
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def staff(request):
+    booster_alert = alert_if_booster(request)
+    context = {
+        'booster_alert': booster_alert
+    }
     permission = request.user.groups.filter(name="staff").exists()
-    print(permission)
-    return render(request, 'vaccinationmanagement/staff.html')
+    return render(request, 'vaccinationmanagement/staff.html', context)
 
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def patients(request):
+    booster_alert = alert_if_booster(request)
     if request.method == "POST":
         searched = request.POST['search-patient']
         if len(searched) != 0:
-            searched_patients = User.objects.get(id=request.user.id).patient_set.filter(Q(first_name__contains=searched) | Q(last_name__contains=searched) | Q(social_security_nr__contains=searched)).values()
-            context = {
-                'searched': searched,
-                'searched_patients': searched_patients
-            }
-            return render(request, 'vaccinationmanagement/patients.html', context)
-    staffs_patients = User.objects.get(id=request.user.id).patient_set.all().values()
+            staffs_patients = User.objects.get(id=request.user.id).patient_set.filter(Q(first_name__icontains=searched) | Q(last_name__icontains=searched) | Q(social_security_nr__icontains=searched))
+        else:
+            staffs_patients = User.objects.get(id=request.user.id).patient_set.all()
+    else:
+        staffs_patients = User.objects.get(id=request.user.id).patient_set.all()
+
+    for patient in staffs_patients:
+        vaccinations = Vaccination.objects.filter(patient__patient_id=patient.patient_id).select_related('vaccin')
+        if check_if_patient_has_booster(vaccinations):
+            patient.upcomming_booster = True
     context = {
-        'data': staffs_patients
+        'staffs_patients': staffs_patients,
+        'booster_alert': booster_alert
     }
     return render(request, 'vaccinationmanagement/patients.html', context)
 
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def patient_vaccinations(request, patient_id):
+    booster_alert = alert_if_booster(request)
     patient = Patient.objects.filter(patient_id=patient_id).values()[0]
     if request.method == "POST":
         searched = request.POST['search-vaccinations']
         if len(searched) != 0:
-            searched_vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id, vaccin__vaccin_name__contains=searched)
-            context = {
-                'patient_id': patient_id,
-                'searched': searched,
-                'searched_vaccinations': searched_vaccinations
-            }
-            return render(request, 'vaccinationmanagement/patient.html', context)
-    vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+            searched_vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id, vaccin__vaccin_name__icontains=searched)
+            grouped_vaccinations = check_for_booster(group_vaccinations(searched_vaccinations))
+        else:
+            vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+            grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
+    else:
+        vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+        # grouped_vaccinations = group_vaccinations(check_for_booster(vaccinations))
+        grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
     context = {
         'patient_id' : patient_id,
         'patient' : patient,
-        'vaccinations' : vaccinations
+        'vaccinations' : grouped_vaccinations,
+        'booster_alert': booster_alert
     }
-
     return render(request, 'vaccinationmanagement/patient.html', context)
 
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
+def vaccination_history(request, patient_id, vaccin_id):
+    booster_alert = alert_if_booster(request)
+    vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id, vaccin__vaccin_id=vaccin_id)
+    patient = Patient.objects.get(patient_id=patient_id)
+    vaccin = Vaccin.objects.get(vaccin_id=vaccin_id)
+    context = {
+        'vaccinations': vaccinations,
+        'patient': patient,
+        'vaccin': vaccin,
+        'booster_alert': booster_alert
+    }
+
+    return render(request, 'vaccinationmanagement/history.html', context)
+
+@user_passes_test(lambda u: u.groups.filter(name='patient').exists(), login_url='index')
+def private_vaccination_history(request, patient_id, vaccin_id):
+    booster_alert = alert_if_booster(request)
+    vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id, vaccin__vaccin_id=vaccin_id)
+    patient = Patient.objects.get(patient_id=patient_id)
+    vaccin = Vaccin.objects.get(vaccin_id=vaccin_id)
+    context = {
+        'vaccinations': vaccinations,
+        'patient': patient,
+        'vaccin': vaccin,
+        'booster_alert': booster_alert
+    }
+
+    return render(request, 'vaccinationmanagement/history.html', context)
+
+def check_for_booster(vaccinations):
+    """
+    Takes a list of vaccinations, groups them, loops through the vaccinations
+    and gets the latest vaccination of each kind. Then checks the timedifference
+    between now and next dose, and in that sets upcomming_booster till True.
+    """
+    for vaccin in vaccinations:
+        latest_vaccination = get_latest_dose(vaccinations.get(vaccin))
+        if latest_vaccination.date_of_next_vaccination is not None:
+            time_differnce = (latest_vaccination.date_of_next_vaccination - datetime.date.today()).days
+            if time_differnce <= 30:
+                latest_vaccination.uppcomming_booster = True
+    return vaccinations
+
+def check_if_patient_has_booster(vaccinations):
+    """
+    Takes a list of vaccinations, groups them, loops through the vaccinations
+    and gets the latest vaccination of each kind. Then checks the timedifference
+    between now and next dose.
+    """
+    vaccinations = group_vaccinations(vaccinations)
+    for vaccin in vaccinations:
+        latest_vaccination = get_latest_dose(vaccinations.get(vaccin))
+        # if latest_vaccination is None:
+        #     return False
+        if latest_vaccination.date_of_next_vaccination is not None:
+            time_differnce = (latest_vaccination.date_of_next_vaccination - datetime.date.today()).days
+            if time_differnce <= 30:
+                return True
+    return False
+
+def alert_if_booster(request):
+    """
+    Takes a request, fetches the users patients, loops through the patients,
+    and checks if there are any upcomming booster vaccinations.
+    """
+    patients = User.objects.get(id=request.user.id).patient_set.all()
+    for patient in patients:
+        vaccinations = Vaccination.objects.filter(patient__patient_id=patient.patient_id).select_related('vaccin')
+        if check_if_patient_has_booster(vaccinations):
+            return True
+    return False
+
+def get_latest_dose(vaccination):
+    """
+    Takes list with vaccinations and returns the vaccination
+    with highest dose number
+    """
+    current_vaccination = None
+    for vaccin in vaccination:
+        if current_vaccination is None:
+            current_vaccination = vaccin
+            continue
+        if vaccin.dose_nr > current_vaccination.dose_nr:
+            current_vaccination = vaccin
+    return current_vaccination
+
+@user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def add_dose(request, patient_id, vaccination_id):
+    booster_alert = alert_if_booster(request)
     context = {
         'patient_id' : patient_id,
-        'vaccination_id': vaccination_id
+        'vaccination_id': vaccination_id,
+        'booster_alert': booster_alert
     }
     if request.method == "POST":
         dose_nr = request.POST['dose_nr']
         date_of_vaccination = request.POST['date_of_vaccination']
         date_of_next_vaccination = request.POST['date_of_next_vaccination']
+        note = request.POST['note']
         if 'vaccination_done' in request.POST:
             vaccination_done = True
             date_of_next_vaccination = None
         else:
             vaccination_done = False
-        ins = Vaccination.objects.filter(vaccination_id=vaccination_id)
-        ins.update(dose_nr=dose_nr, date_of_vaccination=date_of_vaccination, date_of_next_vaccination=date_of_next_vaccination, vaccination_done=vaccination_done)
+        vaccination = Vaccination.objects.get(vaccination_id=vaccination_id)
+        ins = Vaccination(vaccin=vaccination.vaccin, dose_nr=dose_nr, date_of_vaccination=date_of_vaccination, date_of_next_vaccination=date_of_next_vaccination, patient=vaccination.patient, vaccination_done=vaccination_done, note=note)
+        ins.save()
         return redirect('patient', patient_id=patient_id)
     else:
+        context['dose_nr'] = Vaccination.objects.get(vaccination_id=vaccination_id).dose_nr
         return render(request, 'vaccinationmanagement/forms/add-dose.html', context)
 
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def add_patient(request):
+    booster_alert = alert_if_booster(request)
     patients = Patient.objects.all().values()
-    context = {
-        'patients' : patients
-    }
     if request.method == "POST":
-        patient_id = request.POST['addPatient']
-        print(patient_id)
+        patient_id = request.POST['patient']
         Patient.objects.get(patient_id=patient_id).belong_to_users.add(User.objects.get(id=request.user.id))
         return redirect('patients')
     else:
-        return render(request, 'vaccinationmanagement/forms/add-patient.html', context)
+        exclude_patients = User.objects.get(id=request.user.id).patient_set.all()
+        for exclude_patient in exclude_patients:
+            patients = patients.exclude(patient_id=exclude_patient.patient_id)
+    context = {
+        'patients' : patients,
+        'booster_alert': booster_alert
+    }
+    return render(request, 'vaccinationmanagement/forms/add-patient.html', context)
+
+def group_vaccinations(vaccinations):
+    grouped_vaccinations = {}
+    for vaccination in vaccinations:
+        vaccin_id = vaccination.vaccin_id
+        if vaccin_id in grouped_vaccinations:
+            grouped_vaccinations[vaccin_id].append(vaccination)
+        else:
+            grouped_vaccinations[vaccin_id] = [vaccination]
+    return grouped_vaccinations
+
+@user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
+def remove_patient(request, patient_id):
+    Patient.objects.get(patient_id=patient_id).belong_to_users.remove(User.objects.get(id=request.user.id))
+    return redirect('patients')
 
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def add_vaccination(request, patient_id):
+    booster_alert = alert_if_booster(request)
     context = {
         'patient_id' : patient_id
     }
     if request.method == "POST":
-        # form = AddVaccination(request.POST)
-        # if form_is_valid():
-        #     pass
-        print(request.POST)
         vaccin = Vaccin.objects.get(vaccin_id=request.POST['vaccin'])
         dose_nr = request.POST['dose_nr']
         date_of_vaccination = request.POST['date_of_vaccination']
         date_of_next_vaccination = request.POST['date_of_next_vaccination']
+        note = request.POST['note']
         patient = Patient.objects.get(patient_id=request.POST['patient'])
         if 'vaccination_done' in request.POST:
             vaccination_done = True
             date_of_next_vaccination = None
         else:
             vaccination_done = False
-        ins = Vaccination(vaccin=vaccin, dose_nr=dose_nr, date_of_vaccination=date_of_vaccination, date_of_next_vaccination=date_of_next_vaccination, patient=patient, vaccination_done=vaccination_done)
+        ins = Vaccination(vaccin=vaccin, dose_nr=dose_nr, date_of_vaccination=date_of_vaccination, date_of_next_vaccination=date_of_next_vaccination, patient=patient, vaccination_done=vaccination_done, note=note)
         ins.save()
         return redirect('patient', patient_id=patient_id)
     else:
         vaccins = Vaccin.objects.all()
-        # form = AddVaccination()
+        vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+        for exclude_vaccin in vaccinations:
+            vaccins = vaccins.exclude(vaccin_id=exclude_vaccin.vaccin_id)
         context = {
             'patient_id' : patient_id,
-            'vaccins': vaccins
+            'vaccins': vaccins,
+            'booster_alert': booster_alert
         }
         return render(request, 'vaccinationmanagement/forms/add-vaccination.html', context)
 
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
-def search_patient(request, patient_id):
-    context = {
-        'patient_id' : patient_id
-    }
-    if request.method == "POST":
-        return render(request, 'vaccinationmanagement/patient.html', context)
-
-@user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
-def search_vaccin(request, vaccin_id):
-    context = {
-        'vaccin_id' : vaccin_id
-    }
-    if request.method == "POST":
-        return render(request, 'vaccinationmanagement/vaccins.html', context)
-
-@user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def vaccins(request):
+    booster_alert = alert_if_booster(request)
     if request.method == "POST":
         searched = request.POST['search-vaccin']
         if len(searched) != 0:
-            searched_vaccins = Vaccin.objects.filter(vaccin_name__contains=searched).values()
-            context = {
-                'searched': searched,
-                'searched_vaccins': searched_vaccins
-            }
-            return render(request, 'vaccinationmanagement/vaccins.html', context)
-    all_vaccins = Vaccin.objects.all().values()
+            vaccins = Vaccin.objects.filter(Q(protects_against__icontains=searched) | Q(vaccin_name__icontains=searched)).values()
+        else:
+            vaccins = Vaccin.objects.all().values()
+    else:
+        vaccins = Vaccin.objects.all().values()
     context = {
-        'data': all_vaccins
+        'vaccins': vaccins,
+        'booster_alert': booster_alert
     }
     return render(request, 'vaccinationmanagement/vaccins.html', context)
 
 @user_passes_test(lambda u: u.groups.filter(name='patient').exists(), login_url='index')
 def private(request):
-    return render(request, 'vaccinationmanagement/private.html')
+    booster_alert = alert_if_booster(request)
+    patient = User.objects.get(id=request.user.id).patient_set.all().values()[0]
+    context = {
+        "patient": patient,
+        'booster_alert': booster_alert
+    }
+    return render(request, 'vaccinationmanagement/private.html', context)
 
 @user_passes_test(lambda u: u.groups.filter(name='patient').exists(), login_url='index')
 def vaccinations(request):
+    booster_alert = alert_if_booster(request)
+    print(booster_alert)
     patient = User.objects.get(id=request.user.id).patient_set.first()
     patient_id=getattr(patient, 'patient_id')
     if request.method == "POST":
         searched = request.POST['search-vaccinations']
         if len(searched) != 0:
-            searched_vaccinations = Vaccination.objects.filter(patient_id=patient_id, vaccin__vaccin_name__contains=searched)
-            context = {
-                'patient_id': patient_id,
-                'searched': searched,
-                'searched_vaccinations': searched_vaccinations
-            }
-            return render(request, 'vaccinationmanagement/vaccinations.html', context)
-    vaccinations = Vaccination.objects.filter(patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+            searched_vaccinations = Vaccination.objects.filter(patient_id=patient_id, vaccin__vaccin_name__icontains=searched)
+            grouped_vaccinations = group_vaccinations(check_for_booster(searched_vaccinations))
+        else:
+            vaccinations = Vaccination.objects.filter(patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+            grouped_vaccinations = group_vaccinations(check_for_booster(vaccinations))
+    else:
+        vaccinations = Vaccination.objects.filter(patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+        grouped_vaccinations = group_vaccinations(check_for_booster(vaccinations))
     context = {
         'patient_id': patient_id,
         'patient' : patient,
-        'vaccinations' : vaccinations
+        'vaccinations' : grouped_vaccinations,
+        'booster_alert': booster_alert
     }
 
     return render(request, 'vaccinationmanagement/vaccinations.html', context)
