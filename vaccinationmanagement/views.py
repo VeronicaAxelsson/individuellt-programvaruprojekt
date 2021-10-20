@@ -38,14 +38,15 @@ def staff(request):
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def patients(request):
     booster_alert = alert_if_booster(request)
+    staffs_patients = User.objects.get(id=request.user.id).patient_set.all()
     if request.method == "POST":
         searched = request.POST['search-patient']
         if len(searched) != 0:
             staffs_patients = User.objects.get(id=request.user.id).patient_set.filter(Q(first_name__icontains=searched) | Q(last_name__icontains=searched) | Q(social_security_nr__icontains=searched))
-        else:
-            staffs_patients = User.objects.get(id=request.user.id).patient_set.all()
-    else:
-        staffs_patients = User.objects.get(id=request.user.id).patient_set.all()
+        # else:
+        #     staffs_patients = User.objects.get(id=request.user.id).patient_set.all()
+    # else:
+    #     staffs_patients = User.objects.get(id=request.user.id).patient_set.all()
 
     for patient in staffs_patients:
         vaccinations = Vaccination.objects.filter(patient__patient_id=patient.patient_id).select_related('vaccin')
@@ -61,18 +62,19 @@ def patients(request):
 def patient_vaccinations(request, patient_id):
     booster_alert = alert_if_booster(request)
     patient = Patient.objects.filter(patient_id=patient_id).values()[0]
+    vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+    grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
     if request.method == "POST":
         searched = request.POST['search-vaccinations']
         if len(searched) != 0:
             searched_vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id, vaccin__vaccin_name__icontains=searched)
             grouped_vaccinations = check_for_booster(group_vaccinations(searched_vaccinations))
-        else:
-            vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id).select_related('vaccin').order_by('vaccin')
-            grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
-    else:
-        vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id).select_related('vaccin').order_by('vaccin')
-        # grouped_vaccinations = group_vaccinations(check_for_booster(vaccinations))
-        grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
+    #     else:
+    #         vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+    #         grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
+    # else:
+    #     vaccinations = Vaccination.objects.filter(patient__patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+    #     grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
     context = {
         'patient_id' : patient_id,
         'patient' : patient,
@@ -196,14 +198,15 @@ def add_vaccination(request, patient_id):
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def vaccins(request):
     booster_alert = alert_if_booster(request)
+    vaccins = Vaccin.objects.all().values()
     if request.method == "POST":
         searched = request.POST['search-vaccin']
         if len(searched) != 0:
             vaccins = Vaccin.objects.filter(Q(protects_against__icontains=searched) | Q(vaccin_name__icontains=searched)).values()
-        else:
-            vaccins = Vaccin.objects.all().values()
-    else:
-        vaccins = Vaccin.objects.all().values()
+    #     else:
+    #         vaccins = Vaccin.objects.all().values()
+    # else:
+    #     vaccins = Vaccin.objects.all().values()
     context = {
         'vaccins': vaccins,
         'booster_alert': booster_alert
@@ -223,20 +226,21 @@ def private(request):
 @user_passes_test(lambda u: u.groups.filter(name='patient').exists(), login_url='index')
 def vaccinations(request):
     booster_alert = alert_if_booster(request)
-    print(booster_alert)
     patient = User.objects.get(id=request.user.id).patient_set.first()
     patient_id=getattr(patient, 'patient_id')
+    vaccinations = Vaccination.objects.filter(patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+    grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
     if request.method == "POST":
         searched = request.POST['search-vaccinations']
         if len(searched) != 0:
             searched_vaccinations = Vaccination.objects.filter(patient_id=patient_id, vaccin__vaccin_name__icontains=searched)
             grouped_vaccinations = check_for_booster(group_vaccinations(searched_vaccinations))
-        else:
-            vaccinations = Vaccination.objects.filter(patient_id=patient_id).select_related('vaccin').order_by('vaccin')
-            grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
-    else:
-        vaccinations = Vaccination.objects.filter(patient_id=patient_id).select_related('vaccin').order_by('vaccin')
-        grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
+    #     else:
+    #         vaccinations = Vaccination.objects.filter(patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+    #         grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
+    # else:
+    #     vaccinations = Vaccination.objects.filter(patient_id=patient_id).select_related('vaccin').order_by('vaccin')
+    #     grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
     context = {
         'patient_id': patient_id,
         'patient' : patient,
