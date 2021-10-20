@@ -1,6 +1,9 @@
-from django.contrib.auth.models import User
-from vaccinationmanagement.models import Vaccin, Patient, Vaccination
+"""
+Functions
+"""
 import datetime
+from django.contrib.auth.models import User
+from vaccinationmanagement.models import Vaccination
 
 def check_for_booster(vaccinations):
     """
@@ -11,7 +14,9 @@ def check_for_booster(vaccinations):
     for vaccin in vaccinations:
         latest_vaccination = get_latest_dose(vaccinations.get(vaccin))
         if latest_vaccination.date_of_next_vaccination is not None:
-            time_differnce = (latest_vaccination.date_of_next_vaccination - datetime.date.today()).days
+            time_differnce = (
+                latest_vaccination.date_of_next_vaccination - datetime.date.today()
+            ).days
             if time_differnce <= 30:
                 latest_vaccination.uppcomming_booster = True
     return vaccinations
@@ -28,7 +33,9 @@ def check_if_patient_has_booster(vaccinations):
         # if latest_vaccination is None:
         #     return False
         if latest_vaccination.date_of_next_vaccination is not None:
-            time_differnce = (latest_vaccination.date_of_next_vaccination - datetime.date.today()).days
+            time_differnce = (
+                latest_vaccination.date_of_next_vaccination - datetime.date.today()
+            ).days
             if time_differnce <= 30:
                 return True
     return False
@@ -40,7 +47,9 @@ def alert_if_booster(request):
     """
     patients = User.objects.get(id=request.user.id).patient_set.all()
     for patient in patients:
-        vaccinations = Vaccination.objects.filter(patient__patient_id=patient.patient_id).select_related('vaccin')
+        vaccinations = Vaccination.objects.filter(
+            patient__patient_id=patient.patient_id
+        ).select_related('vaccin')
         if check_if_patient_has_booster(vaccinations):
             return True
     return False
@@ -60,6 +69,9 @@ def get_latest_dose(vaccination):
     return current_vaccination
 
 def group_vaccinations(vaccinations):
+    """
+    Groups vaccinations with same vaccin
+    """
     grouped_vaccinations = {}
     for vaccination in vaccinations:
         vaccin_id = vaccination.vaccin_id

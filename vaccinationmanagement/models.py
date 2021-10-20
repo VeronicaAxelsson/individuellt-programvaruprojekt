@@ -1,7 +1,13 @@
+"""
+Models
+"""
 from django.db import models
 from django.contrib.auth.models import User
 
 class Vaccin(models.Model):
+    """
+    Vaccine table
+    """
     vaccin_id = models.BigAutoField(primary_key=True)
     vaccin_name = models.CharField(max_length=255)
     protects_against = models.CharField(max_length=255)
@@ -11,6 +17,9 @@ class Vaccin(models.Model):
         return self.vaccin_name
 
 class Patient(models.Model):
+    """
+    Patient table
+    """
     patient_id = models.BigAutoField(primary_key=True)
     social_security_nr = models.CharField(max_length=10)
     first_name = models.CharField(max_length=50)
@@ -20,11 +29,10 @@ class Patient(models.Model):
     email = models.CharField(max_length=50)
     belong_to_users = models.ManyToManyField(User)
 
-    @property
-    def full_name(self):
-        return '%s %s' % (self.first_name, self.last_name)
-
 class Vaccination(models.Model):
+    """
+    Vaccination table
+    """
     vaccination_id = models.BigAutoField(primary_key=True)
     patient = models.ForeignKey(Patient, related_name='patient', on_delete=models.CASCADE)
     vaccin = models.ForeignKey(Vaccin, related_name='vaccin', on_delete=models.CASCADE)
@@ -33,8 +41,3 @@ class Vaccination(models.Model):
     date_of_next_vaccination = models.DateField(default='NULL', null=True)
     vaccination_done = models.BooleanField()
     note = models.CharField(max_length=255, default='NULL')
-
-# class UserPatients(models.Model):
-#     """docstring for Staff_patients."""
-#     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-#     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
