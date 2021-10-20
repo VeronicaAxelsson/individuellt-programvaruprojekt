@@ -29,7 +29,7 @@
             <td>{{ vaccination.dose_nr }}</td>
             <td>{{ vaccination.date_of_vaccination }}</td>
             {% if vaccination.date_of_next_vaccination is None %}
-            <td>Done</td>
+            <td><i class="fas fa-check"></i></td>
             {% else %}
                 {% if vaccination.uppcomming_booster %}
                 <td class="red">{{ vaccination.date_of_next_vaccination }}</td>
@@ -43,5 +43,5 @@
     </tbody>{% endfor %}
     {% endfor %}
     </table>
-<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination within 2 months are marked with red.</p>
+<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination within one months are marked with red.</p>
 {% endblock content %}

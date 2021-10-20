@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib import messages
 import datetime
+from vaccinationmanagement.functions import check_for_booster, check_if_patient_has_booster, alert_if_booster, get_latest_dose, group_vaccinations
 
 def index(request):
     if request.user.groups.filter(name="staff").exists():
@@ -110,63 +111,6 @@ def private_vaccination_history(request, patient_id, vaccin_id):
 
     return render(request, 'vaccinationmanagement/history.html', context)
 
-def check_for_booster(vaccinations):
-    """
-    Takes a list of vaccinations, groups them, loops through the vaccinations
-    and gets the latest vaccination of each kind. Then checks the timedifference
-    between now and next dose, and in that sets upcomming_booster till True.
-    """
-    for vaccin in vaccinations:
-        latest_vaccination = get_latest_dose(vaccinations.get(vaccin))
-        if latest_vaccination.date_of_next_vaccination is not None:
-            time_differnce = (latest_vaccination.date_of_next_vaccination - datetime.date.today()).days
-            if time_differnce <= 30:
-                latest_vaccination.uppcomming_booster = True
-    return vaccinations
-
-def check_if_patient_has_booster(vaccinations):
-    """
-    Takes a list of vaccinations, groups them, loops through the vaccinations
-    and gets the latest vaccination of each kind. Then checks the timedifference
-    between now and next dose.
-    """
-    vaccinations = group_vaccinations(vaccinations)
-    for vaccin in vaccinations:
-        latest_vaccination = get_latest_dose(vaccinations.get(vaccin))
-        # if latest_vaccination is None:
-        #     return False
-        if latest_vaccination.date_of_next_vaccination is not None:
-            time_differnce = (latest_vaccination.date_of_next_vaccination - datetime.date.today()).days
-            if time_differnce <= 30:
-                return True
-    return False
-
-def alert_if_booster(request):
-    """
-    Takes a request, fetches the users patients, loops through the patients,
-    and checks if there are any upcomming booster vaccinations.
-    """
-    patients = User.objects.get(id=request.user.id).patient_set.all()
-    for patient in patients:
-        vaccinations = Vaccination.objects.filter(patient__patient_id=patient.patient_id).select_related('vaccin')
-        if check_if_patient_has_booster(vaccinations):
-            return True
-    return False
-
-def get_latest_dose(vaccination):
-    """
-    Takes list with vaccinations and returns the vaccination
-    with highest dose number
-    """
-    current_vaccination = None
-    for vaccin in vaccination:
-        if current_vaccination is None:
-            current_vaccination = vaccin
-            continue
-        if vaccin.dose_nr > current_vaccination.dose_nr:
-            current_vaccination = vaccin
-    return current_vaccination
-
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def add_dose(request, patient_id, vaccination_id):
     booster_alert = alert_if_booster(request)
@@ -210,16 +154,6 @@ def add_patient(request):
         'booster_alert': booster_alert
     }
     return render(request, 'vaccinationmanagement/forms/add-patient.html', context)
-
-def group_vaccinations(vaccinations):
-    grouped_vaccinations = {}
-    for vaccination in vaccinations:
-        vaccin_id = vaccination.vaccin_id
-        if vaccin_id in grouped_vaccinations:
-            grouped_vaccinations[vaccin_id].append(vaccination)
-        else:
-            grouped_vaccinations[vaccin_id] = [vaccination]
-    return grouped_vaccinations
 
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def remove_patient(request, patient_id):
@@ -296,13 +230,13 @@ def vaccinations(request):
         searched = request.POST['search-vaccinations']
         if len(searched) != 0:
             searched_vaccinations = Vaccination.objects.filter(patient_id=patient_id, vaccin__vaccin_name__icontains=searched)
-            grouped_vaccinations = group_vaccinations(check_for_booster(searched_vaccinations))
+            grouped_vaccinations = check_for_booster(group_vaccinations(searched_vaccinations))
         else:
             vaccinations = Vaccination.objects.filter(patient_id=patient_id).select_related('vaccin').order_by('vaccin')
-            grouped_vaccinations = group_vaccinations(check_for_booster(vaccinations))
+            grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
     else:
         vaccinations = Vaccination.objects.filter(patient_id=patient_id).select_related('vaccin').order_by('vaccin')
-        grouped_vaccinations = group_vaccinations(check_for_booster(vaccinations))
+        grouped_vaccinations = check_for_booster(group_vaccinations(vaccinations))
     context = {
         'patient_id': patient_id,
         'patient' : patient,

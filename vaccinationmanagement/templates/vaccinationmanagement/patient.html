@@ -3,6 +3,7 @@
 {% load vaccinationmanagement_extras %}
 {% block content %}
     <div class="page-header">
+        <a class="back-arrow" href="{% url 'patients' %}"><i class="fas fa-arrow-left"></i> Back to patients</a>
         <h1>{{ patient.first_name }} {{ patient.last_name }}</h1>
         <p><b>SOCIAL SECURITY NUMBER:</b> {{ patient.social_security_nr }}</p>
         <p><b>ADRESS:</b> {{ patient.adress }}</p>
@@ -19,5 +20,5 @@
     </div>
     {% include "vaccinationmanagement/tables/vaccinations-table.html" %}
 
-<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination within 2 months are marked with red.</p>
+<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination within one months are marked with red.</p>
 {% endblock content %}

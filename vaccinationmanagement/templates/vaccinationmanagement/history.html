@@ -3,12 +3,9 @@
 {% load vaccinationmanagement_extras %}
 {% block content %}
 <div class="page-header">
+    <a class="back-arrow" href="{% url 'patient' patient_id=patient.patient_id %}"><i class="fas fa-arrow-left"></i> Back to patient</a>
     <h2>Vaccin: {{ vaccin.vaccin_name }}</h2>
     <p><b>PATIENT: </b>{{ patient.first_name }} {{ patient.last_name }}</p>
-    <p><b>SOCIAL SECURITY NUMBER:</b> {{ patient.social_security_nr }}</p>
-    <p><b>ADRESS:</b> {{ patient.adress }}</p>
-    <p><b>TEL:</b> {{ patient.tel_nr }}</p>
-    <p><b>EMAIL:</b> {{ patient.email }}</p>
 </div>
     <table>
         <thead>
@@ -38,5 +35,4 @@
 </tbody>
 {% endfor %}
 </table>
-<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination within 2 months are marked with red.</p>
 {% endblock content %}

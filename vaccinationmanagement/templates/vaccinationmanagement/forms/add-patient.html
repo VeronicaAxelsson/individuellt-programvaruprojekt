@@ -2,6 +2,7 @@
 
 {% block content %}
     <div class="container">
+        <a class="form-arrow" href="{% url 'patients' %}"><i class="fas fa-arrow-left"></i></a>
         <h2>Add patient</h2>
         <form class="add-form" action="{% url 'add-patient' %}" method="post">
             {% csrf_token %}

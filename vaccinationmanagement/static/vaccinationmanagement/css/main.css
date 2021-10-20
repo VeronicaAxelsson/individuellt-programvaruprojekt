@@ -45,7 +45,7 @@ html {
      flex-direction: column;
      justify-content: center;
      align-items: center;
-     /* padding: 2em; */
+     /* padding-bottom: 2em; */
  }
 
 /* Style the header with a grey background and some padding */
@@ -53,6 +53,7 @@ html {
     width: 100%;
     overflow: hidden;
     background-color: #002845;
+    box-shadow: 0px 2px 4px 0px #3f3f3f;
 }
 
 /* Style the header links */
@@ -152,6 +153,7 @@ html {
 .page-header {
     width: 75%;
     text-align: left;
+    margin-top: 2em;
 }
 
 .page-header p {
@@ -172,6 +174,11 @@ html {
 
 .front-page-button {
     width: 60%;
+    margin: 1em;
+}
+
+.staff-front-page-button {
+    width: 14em;
     margin: 1em;
 }
 
@@ -289,6 +296,7 @@ input[type=checkbox] {
 .search input[type=text] {
     border-radius: 50px;
     max-width: 70%;
+    border: 2px solid #ccc;
 }
 
 .search .button {
@@ -313,6 +321,24 @@ input[type=checkbox] {
     text-transform: uppercase;
     color: #FA8254;
     font-weight: bold;
+    cursor: pointer;
+}
+
+.form-arrow {
+    width: 100%;
+    margin-top: 1.6em;
+}
+
+.back-arrow {
+    font-size: 1em;
+    color: #FA8254;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.form-arrow i {
+    font-size: 2em;
+    color: #FA8254;
 }
 
 table {
@@ -355,6 +381,7 @@ table a {
 
 .header .logout-form {
     padding: 0.5em 0;
+    padding-right: 2em;
     margin: 0;
     line-height: 2.2;
 }
@@ -374,5 +401,10 @@ table a {
 }
 
 .red {
-    color: red;
+    color: #ea0000;
+}
+
+.fa-check,
+.fa-syringe {
+    font-size: 1.4em;
 }

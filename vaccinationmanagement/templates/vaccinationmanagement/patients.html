@@ -26,7 +26,7 @@
                 <td>{{ patient.social_security_nr }}</td>
                 <td>{{patient.first_name}} {{patient.last_name}}</td>
                 {% if patient.upcomming_booster %}
-                <td>Yes</td>
+                <td><i class="fas fa-syringe"></i></td>
                 {% else %}
                 <td></td>
                 {% endif %}
@@ -36,5 +36,5 @@
         </tbody>
     {% endfor %}
 </table>
-<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination refers to booster vaccination within two months</p>
+<p class="allert"><i class="fas fa-exclamation-circle"></i>Uppcomming booster vaccination refers to booster vaccination within one months</p>
 {% endblock content %}

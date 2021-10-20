@@ -3,6 +3,8 @@
 
 {% block content %}
     <div class="container">
+        <a class="form-arrow" href="{% url 'patient' patient_id=patient_id %}"><i class="fas fa-arrow-left"></i></a>
+        <h2>Add a new dose</h2>
         <form class="add-form" action="{% url 'add-dose' patient_id=patient_id vaccination_id=vaccination_id %}" method="post">
             {% csrf_token %}
             <div class="form-div">
