@@ -202,8 +202,9 @@ html {
 }
 
 .login-container {
+    width: 60%;
     padding: 4em 4em;
-    margin-top: 5em;
+    margin-top: 10em;
     display: block;
     margin-left: auto;
     margin-right: auto;
@@ -407,4 +408,8 @@ table a {
 .fa-check,
 .fa-syringe {
     font-size: 1.4em;
+}
+
+.errorlist li {
+    color: red;
 }
