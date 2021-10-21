@@ -1,18 +1,11 @@
 """
 Views
 """
-# import datetime
-
 from django.shortcuts import render
 from django.shortcuts import redirect
-# from django.http import HttpResponse
-# from django.template import loader
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
-# from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
-# from django.contrib.auth import authenticate, login
-# from vaccinationmanagement.forms import AddVaccination
 from django.db.models import Q
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
@@ -145,7 +138,7 @@ def private_vaccination_history(request, patient_id, vaccin_id):
         'booster_alert': booster_alert
     }
 
-    return render(request, 'vaccinationmanagement/history.html', context)
+    return render(request, 'vaccinationmanagement/private-history.html', context)
 
 @user_passes_test(lambda u: u.groups.filter(name='staff').exists(), login_url='index')
 def add_dose(request, patient_id, vaccination_id):
@@ -276,10 +269,7 @@ def vaccins(request):
             all_vaccins = Vaccin.objects.filter(
                 Q(protects_against__icontains=searched) | Q(vaccin_name__icontains=searched)
             ).values()
-    #     else:
-    #         vaccins = Vaccin.objects.all().values()
-    # else:
-    #     vaccins = Vaccin.objects.all().values()
+
     context = {
         'vaccins': all_vaccins,
         'booster_alert': booster_alert
