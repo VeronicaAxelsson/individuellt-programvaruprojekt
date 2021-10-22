@@ -193,7 +193,7 @@ def add_patient(request):
 
     exclude_patients = User.objects.get(id=request.user.id).patient_set.all()
     for exclude_patient in exclude_patients:
-        all_patients = patients.exclude(patient_id=exclude_patient.patient_id)
+        all_patients = all_patients.exclude(patient_id=exclude_patient.patient_id)
     context = {
         'patients' : all_patients,
         'booster_alert': booster_alert
